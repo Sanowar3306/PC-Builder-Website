@@ -1,0 +1,81 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <title>User Profile</title>
+    <!-- Bootstrap CSS -->
+    <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        body {
+            background: url("user.jpg") no-repeat center center fixed;
+            background-size: cover;
+            padding-top: 70px; /* Adjust padding for fixed navbar */
+            overflow: hidden; /* Disable window scroll */
+        }
+
+        .form-v7-content {
+            background: rgba(255, 255, 255, 0.882);
+            border-radius: 8px;
+            box-shadow: 0px 0px 20px rgba(0, 0, 0, 0.1);
+            padding: 30px;
+            margin: auto;
+            max-width: 500px;
+            margin-top: 50px;
+        }
+
+        .form-row {
+            margin-bottom: 20px;
+        }
+
+        .form-row-label {
+            margin-bottom: 10px;
+            display: block;
+        }
+
+        .form-row-last {
+            text-align: center;
+        }
+
+        .card {
+            border-radius: 15px;
+            max-height: 800px; /* Set a max height for the card */
+            overflow-y: auto;
+            padding-bottom: 50px; /* Make it scrollable */
+            position: relative; /* Ensure this is set */
+        }
+
+        .message-container {
+            position: fixed;
+            top: 70px; /* Adjust based on your navbar height */
+            right: 20px;
+            z-index: 1000;
+            width: 300px; /* Adjust the width as needed */
+        }
+    </style>
+</head>
+<body>
+        <div class="text-center">
+            <h2>Customer Viewport Platform</h2>
+        </div>
+      
+        <div class="form-v7-content">
+                <div class = "form-row-label">
+                    <a href="" class="form-row-label">Profile</a>
+                    <a href="" class="form-row-label">Search</a>
+                    <a href="" class="form-row-label">Compare</a>
+                    <a href="" class="form-row-label">Order status</a>
+                    <a href="" class="form-row-label">price</a>
+                    <a href="" class="form-row-label">Wishlist</a>
+                </div>
+           <!-- <form id="logout-form" action="{% url 'logoutUser' %}" method="POST" style="display: none;">
+                {% csrf_token %}
+            </form> -->
+            <button type="button" class="btn btn-danger" onclick="">
+                Logout
+            </button>
+        </div>
+
+    
+</body>
+</html>
