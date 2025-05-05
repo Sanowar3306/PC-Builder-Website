@@ -60,22 +60,33 @@
         </div>
       
         <div class="form-v7-content">
-                <div class = "form-row-label">
-                    <a href="" class="form-row-label">Profile</a>
-                    <a href="" class="form-row-label">Search</a>
-                    <a href="" class="form-row-label">Compare</a>
-                    <a href="" class="form-row-label">Order status</a>
-                    <a href="" class="form-row-label">price</a>
-                    <a href="" class="form-row-label">Wishlist</a>
-                </div>
-           <!-- <form id="logout-form" action="{% url 'logoutUser' %}" method="POST" style="display: none;">
-                {% csrf_token %}
-            </form> -->
-            <button type="button" class="btn btn-danger" onclick="">
-                Logout
-            </button>
+            <div class="form-row-label">
+                <a href="" class="form-row-label">Profile</a>
+                <a href="search.html" class="form-row-label">Search</a>
+                <a href="" class="form-row-label">Compare</a>
+                <a href="" class="form-row-label">Order status</a>
+                <a href="" class="form-row-label">Price</a>
+                <a href="" class="form-row-label">Wishlist</a>
+            </div>
+            <button type="button" class="btn btn-danger" onclick="logout()">Logout</button>
         </div>
 
-    
+        <script>
+            // Confirm Session: Check if the user is logged in
+            const user = JSON.parse(localStorage.getItem('user'));
+            if (!user) {
+                // If the user is not logged in, redirect them to the login page
+                window.location.href = 'login_view.html';
+            } else {
+                // Display the logged-in user's username
+                document.getElementById('usernameDisplay').innerText = user.username;
+            }
+
+            // Logout Function: Clears session data and redirects to login page
+            function logout() {
+                localStorage.removeItem('user'); // Remove user data from localStorage
+                window.location.href = 'login_view.html'; // Redirect to login page
+            }
+        </script>
 </body>
 </html>
