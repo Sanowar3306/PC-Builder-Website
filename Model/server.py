@@ -46,6 +46,27 @@ def admin_login():
         return jsonify({"message": "Admin login successful", "user": session['user']}), 200
     else:
         return jsonify({"message": "Invalid admin credentials or insufficient privileges"}), 401
+        
+@app.route("/register", methods=["POST"])
+def register():
+    data = request.get_json()
+    username = data.get("username")
+    email = data.get("email")
+    password = data.get("password")
+    
+    if users_collection.find_one({"username": username}):
+        return jsonify({"message": "Username already exists"}), 400
+    
+    hashed_password = bcrypt.hashpw(password.encode('utf-8'), bcrypt.gensalt())
+    user_data = {"username": username, "email": email, "password_hash": hashed_password, "role": "user"}
+    users_collection.insert_one(user_data)
+    
+    return jsonify({"message": "Registration successful"}), 201
+
+@app.route("/logout", methods=["POST"])
+def logout():
+    session.pop('user', None)
+    return jsonify({"message": "Logged out successfully"}), 200
 
   app.route("/admin", methods=["GET"])
 def admin_view():
