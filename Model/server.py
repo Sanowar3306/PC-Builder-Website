@@ -68,6 +68,22 @@ def logout():
     session.pop('user', None)
     return jsonify({"message": "Logged out successfully"}), 200
 
+@app.route("/api/components/<component>", methods=["GET"])
+def get_component_products(component):
+    products_cursor = products_collection.find({"category": {'$regex': f'^{component}$', '$options': 'i'}})
+    
+    products = []
+    for prod in products_cursor:
+        product_info = {
+            "name": prod.get('name'),
+            "price": prod.get('price'),
+            "ratings": prod.get('ratings'),
+            "specs": prod.get('specs')
+        }
+        products.append(product_info)
+
+    return jsonify(products)
+
   app.route("/admin", methods=["GET"])
 def admin_view():
     return "Admin View Page"
