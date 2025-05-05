@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Component Details - PC Builder</title>
+  <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
+  <style>
+    body {
+      background: #f8f9fa;
+    }
+    .card {
+      margin-bottom: 20px;
+    }
+    .specs {
+      font-size: 0.9rem;
+    }
+    .sort-select {
+      max-width: 250px;
+    }
+    .btn-group {
+      width: 100%;
+    }
+  </style>
+</head>
+<body>
+  <div class="container my-4">
+
+    <!-- Back Button -->
+    <a href="search.html" class="btn btn-secondary mb-3">&larr; Back to Component Selection</a>
+
+    <h2 id="component-title" class="mb-3"></h2>
+
+    <!-- Search and Sort -->
+    <div class="d-flex justify-content-between mb-3 flex-wrap">
+      <!-- Search -->
+      <div class="input-group mb-2 mr-2">
+        <input type="text" id="search-bar" class="form-control" placeholder="Search products...">
+        <div class="input-group-append">
+          <button class="btn btn-outline-secondary" type="button" onclick="clearSearch()">Clear</button>
+        </div>
+      </div>
+
+      <!-- Sort -->
+      <select id="sort-select" class="form-control sort-select mb-2">
+        <option value="">Sort by...</option>
+        <option value="price-asc">Price: Low → High</option>
+        <option value="price-desc">Price: High → Low</option>
+        <option value="rating-desc">Rating: High → Low</option>
+      </select>
+    </div>
+
+    <div id="product-list" class="row"></div>
+  </div>
+
+<script>
+  const params = new URLSearchParams(window.location.search);
+  const category = params.get('category');
+
+  document.getElementById('component-title').textContent = `${category} Products`;
+
+  let allProducts = [];  // Store fetched products globally
+
+  async function fetchProducts() {
+    try {
+      const response = await fetch(`http://127.0.0.1:5000/api/components/${category}`);
+      const products = await response.json();
+      allProducts = products;  // Save globally
+
+      renderProducts(products);
+
+    } catch (err) {
+      console.error('Error fetching products:', err);
+      document.getElementById('product-list').innerHTML = '<p class="text-danger">Error fetching data.</p>';
+    }
+  }
+
+  function renderProducts(products) {
+    const productList = document.getElementById('product-list');
+    productList.innerHTML = '';
+
+    if (products.length === 0) {
+      productList.innerHTML = '<p>No products found for this component.</p>';
+      return;
+    }
+
+    products.forEach(product => {
+      const col = document.createElement('div');
+      col.classList.add('col-md-6');
+
+      const card = document.createElement('div');
+      card.classList.add('card', 'p-3');
+
+      const title = document.createElement('h5');
+      title.textContent = product.name;
+
+      const price = document.createElement('p');
+      price.innerHTML = `<strong>Price:</strong> $${product.price}`;
+
+      const rating = document.createElement('p');
+      rating.innerHTML = `<strong>Rating:</strong> ${product.ratings}`;
+
+      const specs = document.createElement('ul');
+      specs.classList.add('list-group', 'specs', 'mb-2');
+
+      for (const key in product.specs) {
+        const li = document.createElement('li');
+        li.classList.add('list-group-item');
+        li.textContent = `${key}: ${product.specs[key]}`;
+        specs.appendChild(li);
+      }
+
+      // Add to Cart / Wishlist Buttons
+      const btnGroup = document.createElement('div');
+      btnGroup.classList.add('btn-group', 'mt-3');
+      const addToCartBtn = document.createElement('button');
+      addToCartBtn.classList.add('btn', 'btn-primary');
+      addToCartBtn.textContent = 'Add to Cart';
+      addToCartBtn.onclick = () => addToCart(product);
+
+      const addToWishlistBtn = document.createElement('button');
+      addToWishlistBtn.classList.add('btn', 'btn-warning');
+      addToWishlistBtn.textContent = 'Add to Wishlist';
+      addToWishlistBtn.onclick = () => addToWishlist(product);
+
+      btnGroup.appendChild(addToCartBtn);
+      btnGroup.appendChild(addToWishlistBtn);
+
+      card.appendChild(title);
+      card.appendChild(price);
+      card.appendChild(rating);
+      card.appendChild(specs);
+      card.appendChild(btnGroup);
+
+      col.appendChild(card);
+      productList.appendChild(col);
+    });
+  }
+
+  // Add to Cart
+  function addToCart(product) {
+    console.log(`Product added to cart: ${product.name}`);
+    // Add your cart handling logic here
+  }
+
+  // Add to Wishlist
+  function addToWishlist(product) {
+    console.log(`Product added to wishlist: ${product.name}`);
+    // Add your wishlist handling logic here
+  }
+
+  // Search Filter
+  document.getElementById('search-bar').addEventListener('input', function() {
+    applyFilters();
+  });
+
+  // Sort Filter
+  document.getElementById('sort-select').addEventListener('change', function() {
+    applyFilters();
+  });
+
+  function applyFilters() {
+    const searchQuery = document.getElementById('search-bar').value.toLowerCase();
+    const sortValue = document.getElementById('sort-select').value;
+
+    let filtered = allProducts.filter(p => p.name.toLowerCase().includes(searchQuery));
+
+    if (sortValue === 'price-asc') {
+      filtered.sort((a, b) => a.price - b.price);
+    } else if (sortValue === 'price-desc') {
+      filtered.sort((a, b) => b.price - a.price);
+    } else if (sortValue === 'rating-desc') {
+      filtered.sort((a, b) => b.ratings - a.ratings);
+    }
+
+    renderProducts(filtered);
+  }
+
+  // Clear Search Bar
+  function clearSearch() {
+    document.getElementById('search-bar').value = '';
+    applyFilters();
+  }
+
+  fetchProducts();
+</script>
+
+</body>
+</html>
