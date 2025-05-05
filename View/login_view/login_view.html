@@ -43,28 +43,33 @@
       height: 20px;
       margin-right: 10px;
     }
+
     .full-height {
       height: 100vh;
     }
+
     .form-content {
       background: white;
       border-radius: 8px;
       box-shadow: 0px 0px 20px rgba(0, 0, 0, 0.1);
       padding: 30px;
     }
+
     .form-row {
       margin-bottom: 20px;
     }
+
     .form-row label {
       margin-bottom: 10px;
       display: block;
     }
+
     .form-row-last {
       text-align: center;
-    
     }
   </style>
 </head>
+
 <body>
   <div class="content">
     <div class="container full-height d-flex align-items-center justify-content-center">
@@ -75,45 +80,74 @@
               <p class="text-muted">User Login</p>
             </div>
 
-              <div class="form-row">
-                <label for="username">Username</label>
-                <input type="text" name="clientusrname" class="form-control" id="username">
-              </div>
-              <div class="form-row">
-                <label for="password">Password</label>
-                <input type="password" name="password" class="form-control" id="password">
-              </div>
-              <div class="form-row-last">
-                <input type="submit" value="Log In" class="btn btn-primary btn-block">
-              </div>
-              <div class="google-signin-container text-center my-4">
-                <a href="" class="btn btn-google">
-                    <img src="https://developers.google.com/identity/images/g-logo.png" alt="Google logo" class="google-logo">
-                    Sign in with Google
-                </a>
+            <div class="form-row">
+              <label for="username">Username</label>
+              <input type="text" name="username" class="form-control" id="username">
             </div>
+            <div class="form-row">
+              <label for="password">Password</label>
+              <input type="password" name="password" class="form-control" id="password">
+            </div>
+            <div class="form-row-last">
+              <input type="submit" value="Log In" class="btn btn-primary btn-block">
+            </div>
+
+            <div class="google-signin-container text-center my-4">
+              <a href="" class="btn btn-google">
+                  <img src="https://developers.google.com/identity/images/g-logo.png" alt="Google logo" class="google-logo">
+                  Sign in with Google
+              </a>
+            </div>
+
             <div class="google-signin-container text-center my-4">
               <a href="" class="btn btn-google">
                   <img src="https://github.githubassets.com/images/modules/logos_page/GitHub-Mark.png" alt="GitHub logo" class="google-logo">
                   Sign in with GitHub
               </a>
-          </div>
-            
-            </form>
+            </div>
+
             <div class="text-center mt-4">
-              <span class="text-muted">Do not have an account? <a href="">Create an account!</a></span>
+              <span class="text-muted">Do not have an account? <a href="register.html">Create an account!</a></span>
               <span class="d-block text-center my-4 text-muted"><a href="">Forget Password?</a></span>
             </div>
             <div class="text-center mt-4">
               <span class="text-muted">Log in into other accounts:</span>
               <br>
-                <a href="">Admin</a>
+              <a href="admin_login.html">Admin</a> <!-- Now redirects to admin_login.html -->
             </div>
           </div>
         </div>
       </div>
     </div>
   </div>
+
+  <script>
+    document.querySelector('.btn.btn-primary').addEventListener('click', async function(event) {
+      event.preventDefault();  // prevent form reload
+    
+      const username = document.getElementById('username').value;
+      const password = document.getElementById('password').value;
+    
+      const response = await fetch('http://127.0.0.1:5000/login', {   
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ username, password })
+      });
+    
+      const result = await response.json();
+    
+      if (response.ok) {
+        if (result.user.role === 'user')
+        alert('Login successful!');
+        localStorage.setItem('user', JSON.stringify(result.user));
+        // Redirect: go up one folder and into user_view/
+        window.location.href = '../user_view/user_view.html';
+      } else {
+        alert(result.message);
+      }
+    });
+  </script>
+  
 </body>
 
 </html>
