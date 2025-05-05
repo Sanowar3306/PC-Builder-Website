@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Select Component - PC Builder</title>
+  <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
+  <style>
+    body {
+      background: url("pc_profile.jpg") no-repeat center center fixed;
+      background-size: cover;
+    }
+    .container {
+      height: 100vh;
+    }
+    .card {
+      transition: transform 0.2s ease;
+    }
+    .card:hover {
+      transform: scale(1.05);
+    }
+  </style>
+</head>
+<body>
+  <div class="container d-flex flex-column justify-content-center align-items-center">
+    <h2 class="mb-4 text-white">Select a PC Component</h2>
+    <div class="row">
+      <div class="col-md-4 mb-3">
+        <a href="component.html?category=CPU" class="card text-center p-3">
+          <h4>CPU</h4>
+        </a>
+      </div>
+      <div class="col-md-4 mb-3">
+        <a href="component.html?category=GPU" class="card text-center p-3">
+          <h4>GPU</h4>
+        </a>
+      </div>
+      <div class="col-md-4 mb-3">
+        <a href="component.html?category=Motherboard" class="card text-center p-3">
+          <h4>Motherboard</h4>
+        </a>
+      </div>
+      <div class="col-md-4 mb-3">
+        <a href="component.html?category=RAM" class="card text-center p-3">
+          <h4>RAM</h4>
+        </a>
+      </div>
+      <div class="col-md-4 mb-3">
+        <a href="component.html?category=Storage" class="card text-center p-3">
+          <h4>Storage</h4>
+        </a>
+      </div>
+      <div class="col-md-4 mb-3">
+        <a href="component.html?category=PSU" class="card text-center p-3">
+          <h4>Power Supply (PSU)</h4>
+        </a>
+      </div>
+    </div>
+  </div>
+</body>
+</html>
