@@ -1,5 +1,5 @@
 from db_create import mongo_db
-from basic_functionaliteis import BasicFunctionalities
+from basic_fuctionalities import BasicFunctionalities
 
 class db_collections_values:
     def __init__(self, db_values):
