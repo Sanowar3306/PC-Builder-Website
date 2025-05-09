@@ -2,45 +2,161 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
   <title>Component Details - PC Builder</title>
   <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
   <style>
     body {
-      background: #f8f9fa;
+      background: url("user.jpg") no-repeat center center fixed;
+      background-size: cover;
+      background-color: #f0f4f8;
+      font-family: 'Roboto', sans-serif;
     }
+
+    .container {
+      margin-top: 50px;
+      max-width: 1200px;
+    }
+
+    h2 {
+      font-size: 2.5rem;
+      font-weight: 700;
+      margin-bottom: 30px;
+      text-align: center;
+      color: #333;
+    }
+
     .card {
+      border: none;
+      border-radius: 15px;
+      box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1);
+      transition: transform 0.2s ease, box-shadow 0.3s ease;
+      background-color: #fff;
       margin-bottom: 20px;
     }
+
+    .card:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 15px 30px rgba(0, 0, 0, 0.2);
+    }
+
+    .card-body {
+      padding: 30px;
+      text-align: left;
+    }
+
+    .card-title {
+      font-size: 1.25rem;
+      font-weight: 700;
+      color: #007bff;
+    }
+
     .specs {
       font-size: 0.9rem;
+      color: #6c757d;
     }
+
+    .d-flex {
+      justify-content: space-between;
+      margin-bottom: 30px;
+    }
+
     .sort-select {
       max-width: 250px;
     }
+
+    
     .btn-group {
+      display: flex;
+      justify-content: space-between;
       width: 100%;
+    }
+
+    .btn {
+      font-size: 14px;
+      padding: 12px 30px;
+      margin-top: 10px;
+      border-radius: 25px;
+      transition: all 0.3s ease;
+      width: 48%;
+    }
+
+    .btn-info {
+      background-color: #007bff;
+      color: #fff;
+    }
+
+    .btn-warning {
+      background-color: #ffc107;
+      color: #fff;
+    }
+
+    .btn-outline-danger {
+      background-color: #dc3545;
+      color: #fff;
+    }
+
+    .btn:hover {
+      transform: scale(1.05);
+      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+    }
+
+    .input-group-append button {
+      padding: 10px 20px;
+    }
+
+    .text-muted {
+      font-size: 0.9rem;
+    }
+
+    
+    @media (max-width: 768px) {
+      .d-flex {
+        flex-direction: column;
+        align-items: stretch;
+      }
+
+      .btn-group {
+        flex-direction: column;
+        align-items: stretch;
+      }
+
+      .btn-group .btn {
+        margin-bottom: 10px;
+        width: 100%; 
+      }
     }
   </style>
 </head>
 <body>
-  <div class="container my-4">
 
-    <!-- Back Button -->
-    <a href="search.html" class="btn btn-secondary mb-3">&larr; Back to Component Selection</a>
+  <script>
+  
+    const user = JSON.parse(localStorage.getItem('user'));
+    if (!user) {
+      window.location.href = 'login_view.html';
+    }
+  </script>
+
+  <div class="container">
+  
+    <div class="d-flex justify-content-between align-items-center mb-3 flex-wrap">
+      <a href="search.html" class="btn btn-secondary mb-2">&larr; Back to Component Selection</a>
+      <div>
+        <a href="wishlist.html" class="btn btn-outline-info mr-2 mb-2">💖 My Wishlist</a>
+        <a href="cart.html" class="btn btn-outline-primary mb-2">🛒 My Cart</a>
+      </div>
+    </div>
 
     <h2 id="component-title" class="mb-3"></h2>
 
     <!-- Search and Sort -->
     <div class="d-flex justify-content-between mb-3 flex-wrap">
-      <!-- Search -->
       <div class="input-group mb-2 mr-2">
         <input type="text" id="search-bar" class="form-control" placeholder="Search products...">
-        <div class="input-group-append">
-          <button class="btn btn-outline-secondary" type="button" onclick="clearSearch()">Clear</button>
-        </div>
       </div>
 
-      <!-- Sort -->
       <select id="sort-select" class="form-control sort-select mb-2">
         <option value="">Sort by...</option>
         <option value="price-asc">Price: Low → High</option>
@@ -55,19 +171,16 @@
 <script>
   const params = new URLSearchParams(window.location.search);
   const category = params.get('category');
-
   document.getElementById('component-title').textContent = `${category} Products`;
 
-  let allProducts = [];  // Store fetched products globally
+  let allProducts = [];
 
   async function fetchProducts() {
     try {
       const response = await fetch(`http://127.0.0.1:5000/api/components/${category}`);
       const products = await response.json();
-      allProducts = products;  // Save globally
-
+      allProducts = products;
       renderProducts(products);
-
     } catch (err) {
       console.error('Error fetching products:', err);
       document.getElementById('product-list').innerHTML = '<p class="text-danger">Error fetching data.</p>';
@@ -101,7 +214,6 @@
 
       const specs = document.createElement('ul');
       specs.classList.add('list-group', 'specs', 'mb-2');
-
       for (const key in product.specs) {
         const li = document.createElement('li');
         li.classList.add('list-group-item');
@@ -109,9 +221,9 @@
         specs.appendChild(li);
       }
 
-      // Add to Cart / Wishlist Buttons
       const btnGroup = document.createElement('div');
       btnGroup.classList.add('btn-group', 'mt-3');
+
       const addToCartBtn = document.createElement('button');
       addToCartBtn.classList.add('btn', 'btn-primary');
       addToCartBtn.textContent = 'Add to Cart';
@@ -136,27 +248,53 @@
     });
   }
 
-  // Add to Cart
   function addToCart(product) {
-    console.log(`Product added to cart: ${product.name}`);
-    // Add your cart handling logic here
+    const cart = JSON.parse(localStorage.getItem('cart')) || [];
+    cart.push(product);
+    localStorage.setItem('cart', JSON.stringify(cart));
+    alert(`${product.name} added to cart.`);
   }
 
-  // Add to Wishlist
   function addToWishlist(product) {
-    console.log(`Product added to wishlist: ${product.name}`);
-    // Add your wishlist handling logic here
+    const wishlist = JSON.parse(localStorage.getItem('wishlist')) || [];
+
+    
+    const productExists = wishlist.some(item => item.name === product.name);
+    if (productExists) {
+      alert('This product is already in your wishlist!');
+      return;
+    }
+
+    
+    wishlist.push(product);
+    localStorage.setItem('wishlist', JSON.stringify(wishlist));
+    alert(`${product.name} added to wishlist.`);
+
+    
+    const user = JSON.parse(localStorage.getItem('user'));
+    
+    fetch('http://127.0.0.1:5000/wishlist', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        user: user,  
+        product: product  
+      })
+    })
+    .then(response => response.json())
+    .then(data => {
+      if (data.message) {
+        console.log(data.message);  
+      }
+    })
+    .catch(error => {
+      console.error("Error adding product to wishlist:", error);
+      alert("Failed to add product to wishlist.");
+    });
   }
 
-  // Search Filter
-  document.getElementById('search-bar').addEventListener('input', function() {
-    applyFilters();
-  });
-
-  // Sort Filter
-  document.getElementById('sort-select').addEventListener('change', function() {
-    applyFilters();
-  });
+  document.getElementById('search-bar').addEventListener('input', applyFilters);
+  document.getElementById('sort-select').addEventListener('change', applyFilters);
 
   function applyFilters() {
     const searchQuery = document.getElementById('search-bar').value.toLowerCase();
@@ -175,13 +313,12 @@
     renderProducts(filtered);
   }
 
-  // Clear Search Bar
   function clearSearch() {
     document.getElementById('search-bar').value = '';
     applyFilters();
   }
 
-  fetchProducts();
+  fetchProducts(); 
 </script>
 
 </body>
