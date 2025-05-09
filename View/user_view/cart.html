@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Your Cart - PC Builder</title>
+  <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
+  <style>
+    body {
+      background: url("user.jpg") no-repeat center center fixed;
+      background-size: cover;
+      background-color: #f8f9fa;
+      font-family: 'Roboto', sans-serif;
+    }
+    .container {
+      margin-top: 40px;
+      max-width: 1200px;
+    }
+    h2 {
+      font-size: 2.5rem;
+      font-weight: 700;
+      margin-bottom: 20px;
+      text-align: center;
+      color: #333;
+    }
+    .card {
+      border: none;
+      border-radius: 15px;
+      box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
+      margin-bottom: 15px;
+      background-color: #fff;
+      transition: transform 0.3s ease, box-shadow 0.3s ease;
+    }
+    .card:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 15px 30px rgba(0, 0, 0, 0.2);
+    }
+    .card-body {
+      padding: 20px;
+    }
+    .btn {
+      font-size: 14px;
+      padding: 10px 20px;
+      margin-top: 10px;
+      border-radius: 25px;
+      transition: all 0.3s ease;
+      width: 100%;
+    }
+    .btn-info {
+      background-color: #007bff;
+      color: #fff;
+    }
+    .btn-danger {
+      background-color: #dc3545;
+      color: #fff;
+    }
+    .btn-outline-dark {
+      background-color: transparent;
+      color: #333;
+      border: 1px solid #6c757d;
+    }
+    .btn-outline-dark:hover {
+      background-color: #6c757d;
+      color: #fff;
+    }
+    .btn:hover {
+      transform: scale(1.05);
+      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+    }
+    .btn-group {
+      display: flex;
+      justify-content: space-between;
+      margin-top: 30px;
+    }
+    .btn-group .btn {
+      width: 48%;
+    }
+  </style>
+</head>
+<body>
+
+  <script>
+    const user = JSON.parse(localStorage.getItem('user'));
+    if (!user) {
+      window.location.href = 'login_view.html';
+    }
+  </script>
+
+  <div class="container">
+    <h2 class="mb-4">🛒 Your Cart</h2>
+
+    <div id="cart-container" class="mb-4"></div>
+
+    <div class="btn-group">
+      <button onclick="confirmOrder()" class="btn btn-info">Confirm Order</button>
+      <button onclick="clearCart()" class="btn btn-danger">Clear Cart</button>
+    </div>
+
+    
+    <div class="d-flex justify-content-between mt-4">
+      <a href="checkout.html" class="btn btn-outline-dark" id="checkout-btn" style="display: none;">Proceed to Checkout Page</a>
+      <a href="search.html" class="btn btn-secondary">← Continue Shopping</a>
+    </div>
+  </div>
+
+  <script>
+    function renderCart() {
+      const cart = JSON.parse(localStorage.getItem('cart')) || [];
+      const container = document.getElementById('cart-container');
+      container.innerHTML = '';
+
+      if (cart.length === 0) {
+        container.innerHTML = '<p>Your cart is empty.</p>';
+        return;
+      }
+
+      cart.forEach((product, index) => {
+        const cartItem = document.createElement('div');
+        cartItem.className = 'cart-item';
+
+        cartItem.innerHTML = `
+          <div>
+            <h5>${product.name}</h5>
+            <p><strong>Price:</strong> $${product.price}</p>
+          </div>
+          <button class="btn btn-sm btn-outline-danger" onclick="removeFromCart(${index})">Remove</button>
+        `;
+
+        container.appendChild(cartItem);
+      });
+    }
+
+    function removeFromCart(index) {
+      const cart = JSON.parse(localStorage.getItem('cart')) || [];
+      cart.splice(index, 1);
+      localStorage.setItem('cart', JSON.stringify(cart));
+      renderCart();
+    }
+
+    function clearCart() {
+      localStorage.removeItem('cart');
+      renderCart();
+    }
+
+    function confirmOrder() {
+      const cart = JSON.parse(localStorage.getItem('cart')) || [];
+      const user = JSON.parse(localStorage.getItem('user'));
+
+      if (cart.length === 0) {
+        alert("Cart is empty.");
+        return;
+      }
+
+      
+      cart.forEach(product => {
+        fetch('http://127.0.0.1:5000/cart', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({ user, product })
+        });
+      });
+
+      alert("Order confirmed and synced with server!");
+
+      
+      document.getElementById("checkout-btn").style.display = "inline-block";
+    }
+
+    renderCart();
+  </script>
+
+</body>
+</html>
