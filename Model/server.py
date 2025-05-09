@@ -374,6 +374,142 @@ def all_user_orders():
             result.append({"username": username, "products": product_names})
     return jsonify(result)
 
+@app.route("/api/products", methods=["GET"])
+def get_all_products():
+    products = products_collection.find({}, {"_id": 0, "name": 1, "price": 1})
+    return jsonify(list(products))
+
+
+@app.route("/api/products/update-price", methods=["PATCH"])
+def update_price():
+    data = request.get_json()
+    product_id = data.get("productId")
+    new_price = data.get("price")
+    product_name = data.get("productName")  
+
+    if not product_id or not new_price:
+        return jsonify({"message": "Missing product ID or price"}), 400
+
+    
+    result = products_collection.update_one(
+        {"_id": ObjectId(product_id)},  
+        {"$set": {"price": new_price}}
+    )
+
+    if result.modified_count > 0:
+        return jsonify({"message": f"Price for {product_name} updated successfully"}), 200
+    else:
+        return jsonify({"message": "Failed to update the product price"}), 500
+
+@app.route("/api/products/reset-price", methods=["PATCH"])
+def reset_price():
+    data = request.get_json()
+    product_id = data.get("productId")
+    original_price = data.get("originalPrice")
+
+    if not product_id or not original_price:
+        return jsonify({"message": "Missing product ID or original price"}), 400
+
+    
+    result = products_collection.update_one(
+        {"_id": ObjectId(product_id)},  
+        {"$set": {"price": original_price}}
+    )
+
+    if result.modified_count > 0:
+        return jsonify({"message": "Product price reset successfully"}), 200
+    else:
+        return jsonify({"message": "Failed to reset the product price"}), 500
+
+
+
+@app.route("/api/products/grouped", methods=["GET"])
+def get_products_grouped_by_category():
+    try:
+        
+        pipeline = [
+            {"$group": {"_id": "$category", "products": {"$push": "$$ROOT"}}}
+        ]
+        grouped_products = list(products_collection.aggregate(pipeline))
+
+        
+        for category in grouped_products:
+            category['_id'] = str(category['_id'])  
+            for product in category['products']:
+                product['_id'] = str(product['_id'])  
+
+        return jsonify(grouped_products), 200
+    except Exception as e:
+        
+        print(f"Error: {e}")  
+        return jsonify({"message": "Error fetching products grouped by category"}), 500
+
+
+@app.route("/check-price-drops", methods=["POST"])
+def check_price_drops():
+    data = request.get_json()
+    user = data.get("user")
+    product = data.get("product")
+
+  
+    if not user or not product:
+        return jsonify({"message": "User or product data is missing"}), 400
+
+
+    user_doc = users_collection.find_one({"username": user["username"]})
+    if not user_doc:
+        return jsonify({"message": "User not found"}), 404
+
+    
+    if "alerts" not in user_doc:
+        users_collection.update_one(
+            {"username": user["username"]},
+            {"$set": {"alerts": []}}
+        )
+
+    
+    current_price = product.get("price")
+    original_price = product.get("original_price")
+
+    
+    if current_price and original_price and current_price < original_price:
+        notification = f"Price drop alert: {product['name']} is now cheaper than before!"
+        print(f"Sending notification to {user['username']}: {notification}")
+
+        
+        result = users_collection.update_one(
+            {"username": user["username"]},
+            {"$push": {"alerts": notification}}
+        )
+
+        print(f"Matched {result.matched_count} document(s), Modified {result.modified_count} document(s).")
+        return jsonify({"message": "Notification sent", "notification": notification}), 200
+
+    return jsonify({"message": "No price drop detected"}), 200
+
+
+@app.route("/user/notifications/<username>", methods=["GET"])
+def get_user_notifications(username):
+    user = users_collection.find_one({"username": username})
+    if user and "alerts" in user:
+        return jsonify({"notifications": user["alerts"]})
+    return jsonify({"notifications": []})
+
+
+def scheduled_job():
+    print("Running price drop check...")
+    with app.app_context():
+        client = app.test_client()
+        client.post("/check-price-drops")
+
+
+scheduler = BackgroundScheduler()
+scheduler.add_job(scheduled_job, 'interval', hours=1)
+scheduler.start()
+
+
+atexit.register(lambda: scheduler.shutdown())
+
 
 if __name__ == "__main__":
     app.run(debug=True)
