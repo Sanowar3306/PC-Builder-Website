@@ -93,16 +93,13 @@ def user_view():
     return "User View Page"
 
 
-
 @app.route("/cart", methods=["POST"])
 def add_to_cart():
     data = request.get_json()
     user = data.get("user")
     product = data.get("product")
-
     if not user or not product:
         return jsonify({"message": "Missing user or product data"}), 400
-
     users_collection.update_one(
         {"username": user["username"]},
         {"$push": {"orders": {"product": product, "status": "in_cart"}}}
@@ -119,17 +116,13 @@ def add_to_wishlist():
 
     if not user or not product:
         return jsonify({"message": "Missing user or product data"}), 400
-
     wishlist = user.get('wishlist', [])
-   
     if any(item['name'] == product['name'] for item in wishlist):
         return jsonify({"message": "This product is already in your wishlist."}), 400
-
     users_collection.update_one(
         {"username": user["username"]},
         {"$push": {"wishlist": product}}  
     )
-
     updated_user = users_collection.find_one({"username": user["username"]})
     return jsonify({"message": "Product added to wishlist", "wishlist": updated_user.get("wishlist", [])}), 200
 
@@ -139,15 +132,12 @@ def add_to_wishlist():
 def clear_wishlist():
     data = request.get_json()
     user = data.get("user")
-
     if not user:
         return jsonify({"message": "Missing user data"}), 400
-
     result = users_collection.update_one(
         {"username": user["username"]},
         {"$set": {"wishlist": []}}  
     )
-
     if result.modified_count > 0:
         return jsonify({"message": "Wishlist cleared successfully."}), 200
     else:
@@ -159,10 +149,8 @@ def clear_wishlist():
 def clear_cart():
     data = request.get_json()
     user = data.get("user")
-
     if not user:
         return jsonify({"message": "Missing user data"}), 400
-
     users_collection.update_one(
         {"username": user["username"]},
         {
@@ -172,6 +160,87 @@ def clear_cart():
         }
     )
     return jsonify({"message": "Cart cleared"}), 200
+
+
+@app.route("/checkout", methods=["POST"])
+def checkout():
+    data = request.get_json()
+    user = data.get("user")
+    username = user.get("username")
+    if not username:
+        return jsonify({"message": "Missing user data"}), 400
+
+    user_doc = users_collection.find_one({"username": username})
+    if not user_doc or "orders" not in user_doc:
+        return jsonify({"message": "No orders to checkout"}), 404
+
+    updated_orders = []
+    total_price = 0.0
+
+    for i in range(len(user_doc["orders"])):
+        order = user_doc["orders"][i]
+        if order.get("status") == "in_cart":
+            try:
+                price = float(order["product"].get("price", 0))
+            except (ValueError, TypeError, KeyError):
+                price = 0.0
+            total_price += price
+            user_doc["orders"][i]["status"] = "ordered"
+            updated_order = {
+                "product": order["product"],
+                "status": "ordered"
+            }
+            updated_orders.append(updated_order)
+
+    if not updated_orders:
+        return jsonify({"message": "No items to checkout."}), 400
+
+    db["orders"].insert_one({
+        "user_id": username,
+        "items": updated_orders,
+        "status": "pending",
+        "total_price": round(total_price, 2),
+        "created_at": datetime.now().strftime("%Y-%m-%d")
+    })
+
+    users_collection.update_one(
+        {"username": username},
+        {"$set": {"orders": user_doc["orders"]}}
+    )
+    return jsonify({
+        "message": "Checkout successful.",
+        "items_checked_out": len(updated_orders),
+        "total_price": total_price
+    }), 200
+
+
+@app.route("/user/cart/<username>", methods=["GET"])
+def get_user_cart(username):
+    user = users_collection.find_one({"username": username})
+    if user and 'orders' in user:
+        cart_items = [o['product'] for o in user['orders'] if o.get('status') == 'in_cart']
+        return jsonify(cart_items)
+    return jsonify([])
+
+
+@app.route("/user/wishlist/<username>", methods=["GET"])
+def get_user_wishlist(username):
+    user = users_collection.find_one({"username": username})
+    if user and 'wishlist' in user:
+        return jsonify(user['wishlist'])
+    return jsonify([])
+
+
+@app.route("/user/orders/<username>", methods=["GET"])
+def get_user_orders(username):
+    orders = db["orders"].find({"user_id": username})
+    return jsonify([{
+        "created_at": order.get("created_at"),
+        "status": order.get("status"),
+        "total_price": order.get("total_price"),
+        "items": order.get("items")
+    } for order in orders])
+
 
 if __name__ == "__main__":
     app.run(debug=True)
