@@ -2,59 +2,141 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
   <title>Select Component - PC Builder</title>
+  <!-- Bootstrap CSS -->
   <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
+  <!-- Font Awesome for icons -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
   <style>
     body {
-      background: url("pc_profile.jpg") no-repeat center center fixed;
+      background: url("user.jpg") no-repeat center center fixed;
       background-size: cover;
+      font-family: 'Roboto', sans-serif;
+      height: 100vh;
+      color: white;
     }
+
     .container {
       height: 100vh;
     }
-    .card {
-      transition: transform 0.2s ease;
+
+    h2 {
+      font-size: 3rem;
+      font-weight: 600;
+      margin-bottom: 40px;
+      text-align: center;
+      text-shadow: 2px 2px 10px rgba(0, 0, 0, 0.5);
     }
+
+    .card {
+      background-color: rgba(0, 0, 0, 0.6);
+      border: none;
+      border-radius: 15px;
+      padding: 30px;
+      text-align: center;
+      transition: transform 0.2s ease, box-shadow 0.3s ease;
+      box-shadow: 0px 0px 15px rgba(0, 0, 0, 0.2);
+    }
+
     .card:hover {
       transform: scale(1.05);
+      box-shadow: 0px 4px 20px rgba(0, 0, 0, 0.3);
+    }
+
+    .card i {
+      font-size: 50px;
+      margin-bottom: 20px;
+    }
+
+    .card h4 {
+      font-size: 1.5rem;
+      font-weight: 500;
+    }
+
+    .row {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: 20px;
+    }
+
+    .col-md-4 {
+      width: 250px;
+    }
+
+    .form-row-label {
+      margin-bottom: 20px;
+    }
+
+    .back-button {
+      position: absolute;
+      top: 20px;
+      left: 20px;
+      padding: 10px 20px;
+      background-color: rgba(0, 0, 0, 0.6);
+      color: white;
+      border: none;
+      border-radius: 50px;
+      font-size: 16px;
+      cursor: pointer;
+      transition: background-color 0.3s ease;
+    }
+
+    .back-button:hover {
+      background-color: rgba(0, 0, 0, 0.8);
     }
   </style>
 </head>
 <body>
+
+  <button class="back-button" onclick="window.location.href='user_view.html'">← Back</button>
+
   <div class="container d-flex flex-column justify-content-center align-items-center">
-    <h2 class="mb-4 text-white">Select a PC Component</h2>
+    <h2>Select a PC Component</h2>
     <div class="row">
       <div class="col-md-4 mb-3">
-        <a href="component.html?category=CPU" class="card text-center p-3">
+        <a href="component.html?category=CPU" class="card text-center">
+          <i class="fas fa-microchip"></i>
           <h4>CPU</h4>
         </a>
       </div>
       <div class="col-md-4 mb-3">
-        <a href="component.html?category=GPU" class="card text-center p-3">
+        <a href="component.html?category=GPU" class="card text-center">
+          <i class="fas fa-cogs"></i>
           <h4>GPU</h4>
         </a>
       </div>
       <div class="col-md-4 mb-3">
-        <a href="component.html?category=Motherboard" class="card text-center p-3">
+        <a href="component.html?category=Motherboard" class="card text-center">
+          <i class="fas fa-laptop"></i>
           <h4>Motherboard</h4>
         </a>
       </div>
       <div class="col-md-4 mb-3">
-        <a href="component.html?category=RAM" class="card text-center p-3">
+        <a href="component.html?category=RAM" class="card text-center">
+          <i class="fas fa-memory"></i>
           <h4>RAM</h4>
         </a>
       </div>
       <div class="col-md-4 mb-3">
-        <a href="component.html?category=Storage" class="card text-center p-3">
+        <a href="component.html?category=Storage" class="card text-center">
+          <i class="fas fa-hdd"></i>
           <h4>Storage</h4>
         </a>
       </div>
       <div class="col-md-4 mb-3">
-        <a href="component.html?category=PSU" class="card text-center p-3">
+        <a href="component.html?category=PSU" class="card text-center">
+          <i class="fas fa-plug"></i>
           <h4>Power Supply (PSU)</h4>
         </a>
       </div>
     </div>
   </div>
+
+  
+  <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.9.2/dist/umd/popper.min.js"></script>
+  <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
 </body>
 </html>
