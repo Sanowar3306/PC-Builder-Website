@@ -2,6 +2,11 @@ from flask import Flask, request, jsonify, session
 from flask_cors import CORS
 import bcrypt
 import pymongo
+from datetime import datetime
+from bson import ObjectId
+from apscheduler.schedulers.background import BackgroundScheduler
+import time
+import atexit
 
 
 uri = "mongodb+srv://project470:project470@projects.pibwcx4.mongodb.net/?retryWrites=true&w=majority&appName=Projects"
@@ -11,9 +16,10 @@ users_collection = db["users"]
 products_collection = db["products"]
 
 app = Flask(__name__)
-CORS(app)  
-
+CORS(app)
+CORS(app, supports_credentials=True)
 app.secret_key = 'your_secret_key_here'
+
 
 @app.route("/login", methods=["POST"])
 def login():
