@@ -1,92 +1,140 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-    <title>User Profile</title>
-    <!-- Bootstrap CSS -->
-    <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
-    <style>
-        body {
-            background: url("user.jpg") no-repeat center center fixed;
-            background-size: cover;
-            padding-top: 70px; /* Adjust padding for fixed navbar */
-            overflow: hidden; /* Disable window scroll */
-        }
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+  <title>Customer Dashboard</title>
+  <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+  <style>
+    body {
+      background: url("user.jpg") no-repeat center center fixed;
+      background-size: cover;
+      height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      font-family: 'Roboto', sans-serif;
+      margin: 0;
+    }
 
-        .form-v7-content {
-            background: rgba(255, 255, 255, 0.882);
-            border-radius: 8px;
-            box-shadow: 0px 0px 20px rgba(0, 0, 0, 0.1);
-            padding: 30px;
-            margin: auto;
-            max-width: 500px;
-            margin-top: 50px;
-        }
+    .form-v7-content {
+      background: rgba(255, 255, 255, 0.85);
+      border-radius: 20px;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+      padding: 40px;
+      width: 100%;
+      max-width: 450px;
+      text-align: center;
+    }
 
-        .form-row {
-            margin-bottom: 20px;
-        }
+    .form-v7-content h2 {
+      font-size: 36px;
+      font-weight: 700;
+      margin-bottom: 30px;
+      color: #333;
+      text-shadow: 1px 1px 5px rgba(0, 0, 0, 0.2);
+    }
 
-        .form-row-label {
-            margin-bottom: 10px;
-            display: block;
-        }
+    .form-row-label {
+      margin-bottom: 15px;
+      font-size: 18px;
+      color: #555;
+      text-decoration: none;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      transition: color 0.3s ease, text-decoration 0.3s ease;
+    }
 
-        .form-row-last {
-            text-align: center;
-        }
+    .form-row-label:hover {
+      color: #007bff;
+      text-decoration: underline;
+    }
 
-        .card {
-            border-radius: 15px;
-            max-height: 800px; /* Set a max height for the card */
-            overflow-y: auto;
-            padding-bottom: 50px; /* Make it scrollable */
-            position: relative; /* Ensure this is set */
-        }
+    .form-row-label i {
+      margin-right: 10px;
+      font-size: 20px;
+      color: #007bff;
+    }
 
-        .message-container {
-            position: fixed;
-            top: 70px; /* Adjust based on your navbar height */
-            right: 20px;
-            z-index: 1000;
-            width: 300px; /* Adjust the width as needed */
-        }
-    </style>
+    .logout-btn {
+      margin-top: 30px;
+      padding: 12px 30px;
+      background-color: #dc3545;
+      border: none;
+      color: white;
+      font-size: 18px;
+      border-radius: 50px;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      width: 100%;
+    }
+
+    .logout-btn:hover {
+      background-color: #c82333;
+      transform: scale(1.05);
+      box-shadow: 0px 10px 20px rgba(0, 0, 0, 0.2);
+    }
+
+    .btn-group-vertical .btn {
+      width: 100%;
+      font-size: 18px;
+      margin-bottom: 15px;
+      padding: 12px;
+      transition: all 0.3s ease;
+      border-radius: 50px;
+    }
+
+    .btn-group-vertical .btn:hover {
+      transform: scale(1.05);
+      box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1);
+    }
+
+    .icon {
+      font-size: 50px;
+      color: #007bff;
+      margin-bottom: 20px;
+    }
+  </style>
 </head>
 <body>
-        <div class="text-center">
-            <h2>Customer Viewport Platform</h2>
-        </div>
-      
-        <div class="form-v7-content">
-            <div class="form-row-label">
-                <a href="" class="form-row-label">Profile</a>
-                <a href="search.html" class="form-row-label">Search</a>
-                <a href="" class="form-row-label">Compare</a>
-                <a href="" class="form-row-label">Order status</a>
-                <a href="" class="form-row-label">Price</a>
-                <a href="" class="form-row-label">Wishlist</a>
-            </div>
-            <button type="button" class="btn btn-danger" onclick="logout()">Logout</button>
+
+    <div class="form-v7-content">
+        <h2>Customer Dashboard</h2>
+        <div class="icon">
+            <i class="fas fa-user-circle"></i>
         </div>
 
-        <script>
-            // Confirm Session: Check if the user is logged in
-            const user = JSON.parse(localStorage.getItem('user'));
-            if (!user) {
-                // If the user is not logged in, redirect them to the login page
-                window.location.href = 'login_view.html';
-            } else {
-                // Display the logged-in user's username
-                document.getElementById('usernameDisplay').innerText = user.username;
-            }
+        <div class="btn-group-vertical">
+            <a href="profile.html" class="btn btn-light">
+                <i class="fas fa-user"></i> Profile
+            </a>
+            <a href="search.html" class="btn btn-light">
+                <i class="fas fa-search"></i> Search
+            </a>
+            <a href="wishlist.html" class="btn btn-light">
+                <i class="fas fa-heart"></i> Wishlist
+            </a>
+        </div>
 
-            // Logout Function: Clears session data and redirects to login page
-            function logout() {
-                localStorage.removeItem('user'); // Remove user data from localStorage
-                window.location.href = 'login_view.html'; // Redirect to login page
-            }
-        </script>
+        <button type="button" class="logout-btn" onclick="logout()">
+            <i class="logout-icon fas fa-sign-out-alt"></i> Logout
+        </button>
+    </div>
+
+    <script>
+        
+        const user = JSON.parse(localStorage.getItem('user'));
+        if (!user) {
+            window.location.href = '../login_view/login_view.html'; 
+        }
+
+        function logout() {
+            localStorage.removeItem('user');
+            window.location.href = '../login_view/login_view.html'; 
+        }
+    </script>
+
 </body>
 </html>
