@@ -1,0 +1,283 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Your Wishlist - PC Builder</title>
+  <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
+  <style>
+    body {
+      background: url("user.jpg") no-repeat center center fixed;
+      background-size: cover;
+      font-family: 'Roboto', sans-serif;
+    }
+
+    .container {
+      margin-top: 50px;
+      max-width: 1200px;
+    }
+
+    h2 {
+      font-size: 2.5rem;
+      font-weight: 700;
+      margin-bottom: 30px;
+      text-align: center;
+      color: #333;
+    }
+
+    .card {
+      border: none;
+      border-radius: 12px;
+      box-shadow: 0px 10px 20px rgba(0, 0, 0, 0.15);
+      transition: transform 0.3s ease, box-shadow 0.3s ease;
+      background-color: #fff;
+      margin-bottom: 20px;
+    }
+
+    .card:hover {
+      transform: translateY(-8px);
+      box-shadow: 0px 20px 40px rgba(0, 0, 0, 0.2);
+    }
+
+    .card-body {
+      padding: 20px;
+      text-align: left;
+    }
+
+    .card-title {
+      font-size: 1.5rem;
+      font-weight: 700;
+      color: #333;
+    }
+
+    .price-drop {
+      color: red;
+      font-weight: bold;
+      font-size: 1.1rem;
+    }
+
+    .btn-primary, .btn-warning {
+      padding: 8px 20px;
+      font-size: 14px;
+      border-radius: 30px;
+      text-align: center;
+      transition: all 0.3s ease;
+      width: auto;
+    }
+
+    .btn-primary {
+      background-color: #007bff;
+      color: #fff;
+    }
+
+    .btn-warning {
+      background-color: #ffc107;
+      color: #fff;
+    }
+
+    .btn-primary:hover, .btn-warning:hover {
+      transform: scale(1.05);
+      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+    }
+
+    .btn-group {
+      width: 100%;
+    }
+
+    .form-control-inline {
+      width: 100px;
+      display: inline-block;
+      margin-left: 10px;
+    }
+
+    
+    .wishlist-actions {
+      display: flex;
+      justify-content: space-between;
+      margin-top: 30px;
+    }
+
+    .wishlist-actions .btn {
+      width: 48%;
+    }
+
+    
+    .loading-spinner {
+      display: none;
+      width: 50px;
+      height: 50px;
+      border: 5px solid rgba(0, 0, 0, 0.1);
+      border-radius: 50%;
+      border-top: 5px solid #3498db;
+      animation: spin 1s linear infinite;
+      margin: 0 auto;
+    }
+
+    @keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+
+  </style>
+</head>
+<body>
+
+  <script>
+    const user = JSON.parse(localStorage.getItem('user'));
+    if (!user) {
+      window.location.href = 'login_view.html';
+    }
+  </script>
+
+  <div class="container">
+    <h2 class="mb-4">💖 Your Wishlist</h2>
+
+    <div id="wishlist-container" class="mb-4"></div>
+
+    <div class="loading-spinner" id="loading-spinner"></div>
+
+    
+    <div class="wishlist-actions">
+      <button onclick="clearWishlist()" class="btn btn-danger">Clear Wishlist</button>
+      <a href="search.html" class="btn btn-secondary">← Continue Browsing</a>
+    </div>
+  </div>
+
+  <script>
+    
+    function renderWishlist() {
+      const wishlist = JSON.parse(localStorage.getItem('wishlist')) || [];
+      const container = document.getElementById('wishlist-container');
+      container.innerHTML = '';
+
+      if (wishlist.length === 0) {
+        container.innerHTML = '<p>Your wishlist is empty. <a href="search.html">Start adding products</a></p>';
+        return;
+      }
+
+      wishlist.forEach((product, index) => {
+        const card = document.createElement('div');
+        card.className = 'card p-3';
+
+        
+        let priceDropNotification = '';
+        if (product.hasPriceDrop) {
+          priceDropNotification = `<p class="price-drop">Price dropped! Was $${product.originalPrice}</p>`;
+        }
+
+        card.innerHTML = `
+          <h5 class="card-title">${product.name}</h5>
+          <p><strong>Price:</strong> $${product.price}</p>
+          ${priceDropNotification}
+          <button class="btn btn-sm btn-outline-danger" onclick="removeFromWishlist(${index}, '${product.name}')">Remove</button>
+        `;
+
+        container.appendChild(card);
+      });
+    }
+
+    
+    function removeFromWishlist(index, productName) {
+      const wishlist = JSON.parse(localStorage.getItem('wishlist')) || [];
+      const product = wishlist[index];  
+      wishlist.splice(index, 1);  
+
+      
+      localStorage.setItem('wishlist', JSON.stringify(wishlist));
+
+      
+      fetch('http://127.0.0.1:5000/remove-product-from-wishlist', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          user: user,
+          product_name: productName  
+        })
+      })
+      .then(response => response.json())
+      .then(data => {
+        if (data.message) {
+          alert(data.message);  
+          renderWishlist();  
+        }
+      })
+      .catch(error => {
+        console.error("Error removing product from wishlist:", error);
+        alert("Failed to remove product from wishlist.");
+      });
+    }
+
+    
+    function clearWishlist() {
+      localStorage.removeItem('wishlist');
+
+      
+      fetch('http://127.0.0.1:5000/clear-wishlist', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ user: user })
+      })
+      .then(response => response.json())
+      .then(data => {
+        if (data.message) {
+          alert(data.message);  
+          renderWishlist(); 
+        }
+      })
+      .catch(error => {
+        console.error("Error clearing wishlist:", error);
+        alert("Failed to clear the wishlist.");
+      });
+    }
+
+    
+    async function checkForPriceDrops() {
+      const wishlist = JSON.parse(localStorage.getItem('wishlist')) || [];
+      const user = JSON.parse(localStorage.getItem('user'));
+
+      if (wishlist.length === 0) {
+        alert("Your wishlist is empty.");
+        return;
+      }
+
+      for (let product of wishlist) {
+        const response = await fetch('http://127.0.0.1:5000/api/products', {
+          method: 'GET',
+          headers: {
+            'Content-Type': 'application/json'
+          }
+        });
+
+        const products = await response.json();
+        const serverProduct = products.find(p => p.name === product.name);
+
+        
+        if (serverProduct && serverProduct.price < product.price) {
+          
+          product.hasPriceDrop = true;
+          product.originalPrice = product.price;  
+          product.price = serverProduct.price;  
+
+          
+          fetch('http://127.0.0.1:5000/check-price-drops', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ user, product })
+          }).then(res => res.json())
+            .then(data => {
+              alert(`Price drop alert: ${product.name} is now cheaper than before!`);
+            });
+        }
+      }
+
+      renderWishlist();  
+    }
+
+    
+    window.onload = function() {
+      renderWishlist();
+      checkForPriceDrops();  
+    };
+  </script>
+
+</body>
+</html>
