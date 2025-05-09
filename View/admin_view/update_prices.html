@@ -1,0 +1,279 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+  <title>Update Product Prices</title>
+  <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
+  <style>
+    body {
+      background: url("admin.jpg") no-repeat center center fixed;
+      background-size: cover;
+      
+      color: black; 
+    }
+
+    .container {
+      max-width: 1000px;
+      margin-top: 50px;
+    }
+
+    h2 {
+      font-size: 3rem;
+      font-weight: 700;
+      text-align: center;
+      margin-bottom: 30px;
+      text-shadow: 2px 2px 5px rgba(0, 0, 0, 0.5);
+    }
+
+    .card {
+      border-radius: 15px;
+      background-color: rgba(255, 255, 255, 0.85);
+      box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+      transition: transform 0.3s ease, box-shadow 0.3s ease;
+    }
+
+    .card:hover {
+      transform: translateY(-10px);
+      box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
+    }
+
+    .category-header {
+      font-weight: bold;
+      font-size: 1.5rem;
+      color: #333;
+      margin-top: 20px;
+      cursor: pointer;
+    }
+
+    .category-container {
+      margin-bottom: 40px;
+    }
+
+    .form-control-inline {
+      width: 120px;
+      display: inline-block;
+      margin-left: 10px;
+      padding: 10px;
+    }
+
+    .loading-spinner {
+      display: none;
+      width: 50px;
+      height: 50px;
+      border: 5px solid rgba(0, 0, 0, 0.1);
+      border-radius: 50%;
+      border-top: 5px solid #3498db;
+      animation: spin 1s linear infinite;
+      margin: 0 auto;
+    }
+
+    @keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+
+    .btn {
+      padding: 12px 30px;
+      font-size: 16px;
+      font-weight: 500;
+      border-radius: 30px;
+      text-align: center;
+      transition: all 0.3s ease;
+      width: 100%;
+    }
+
+    .btn-primary {
+      background-color: #007bff;
+      color: white;
+      border: none;
+    }
+
+    .btn-warning {
+      background-color: #ffc107;
+      color: white;
+      border: none;
+    }
+
+    .btn-primary:hover, .btn-warning:hover {
+      transform: scale(1.05);
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
+    }
+
+    .btn-group {
+      width: 100%;
+      display: flex;
+      gap: 10px;
+      justify-content: space-between;
+    }
+
+    .btn-group .btn {
+      width: 48%;
+    }
+
+  </style>
+</head>
+<body>
+
+<div class="container">
+  <h2>🛠️ Update Product Prices</h2>
+  <div id="product-list"></div>
+  <div class="loading-spinner" id="loading-spinner"></div>
+  <a href="admin_view.html" class="btn btn-secondary mt-3">← Back</a>
+</div>
+
+<script>
+  async function loadProducts() {
+    document.getElementById('loading-spinner').style.display = 'block';  
+    const res = await fetch("http://127.0.0.1:5000/api/products/grouped");
+    const data = await res.json();
+
+    
+    data.sort((a, b) => a._id.localeCompare(b._id));
+
+    const container = document.getElementById("product-list");
+    container.innerHTML = ''; 
+
+    data.forEach(category => {
+      const categoryContainer = document.createElement('div');
+      categoryContainer.classList.add('category-container');
+      
+      
+      const categoryHeader = document.createElement('div');
+      categoryHeader.classList.add('category-header');
+      categoryHeader.textContent = category._id;  
+      categoryHeader.onclick = () => toggleCategory(category._id);
+      categoryContainer.appendChild(categoryHeader);
+
+      
+      const categoryProducts = document.createElement('div');
+      categoryProducts.classList.add('category-products');
+      categoryProducts.setAttribute("id", `${category._id}-products`);
+      categoryProducts.style.display = 'none';  
+
+      
+      category.products.forEach(product => {
+        const card = document.createElement('div');
+        card.className = "card p-3";
+        card.innerHTML = `
+          <strong>${product.name}</strong>
+          <input type="number" value="${product.price}" class="form-control form-control-inline" id="${product._id}" min="0">
+          <button class="btn btn-primary btn-sm ml-2" onclick="updatePrice('${product._id}', '${product.name}')">Update</button>
+          <button class="btn btn-warning btn-sm ml-2" onclick="resetPrice('${product._id}', '${product.original_price}')">Reset Price</button>
+        `;
+        categoryProducts.appendChild(card);
+      });
+
+      
+      categoryContainer.appendChild(categoryProducts);
+      container.appendChild(categoryContainer);
+    });
+
+    document.getElementById('loading-spinner').style.display = 'none';  
+  }
+
+  
+  function toggleCategory(categoryId) {
+    const categoryProducts = document.getElementById(`${categoryId}-products`);
+    const currentDisplay = categoryProducts.style.display;
+
+    
+    if (currentDisplay === 'none') {
+      categoryProducts.style.display = 'block';
+    } else {
+      categoryProducts.style.display = 'none';
+    }
+  }
+
+  
+  async function updatePrice(productId, productName) {
+    const input = document.getElementById(productId);
+    const newPrice = parseFloat(input.value);
+
+    if (!newPrice || isNaN(newPrice) || newPrice < 0) {
+      alert("Please enter a valid positive price");
+      return;
+    }
+
+    
+    const res = await fetch("http://127.0.0.1:5000/api/products/update-price", {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ productId, price: newPrice, productName })
+    });
+    const result = await res.json();
+    alert(result.message);
+
+    
+    syncPriceInWishlist(productId, newPrice);
+
+    
+    loadProducts();
+  }
+
+  
+  function syncPriceInWishlist(productId, newPrice) {
+    const wishlist = JSON.parse(localStorage.getItem('wishlist')) || [];
+    const updatedWishlist = wishlist.map(product => {
+      if (product._id === productId) {
+        product.price = newPrice;  
+      }
+      return product;
+    });
+    localStorage.setItem('wishlist', JSON.stringify(updatedWishlist));
+
+    
+    renderWishlist();
+  }
+
+  
+  async function resetPrice(productId, originalPrice) {
+    if (!originalPrice || isNaN(originalPrice)) {
+      alert("Original price is not available.");
+      return;
+    }
+
+    const res = await fetch("http://127.0.0.1:5000/api/products/reset-price", {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ productId, originalPrice })
+    });
+
+    const result = await res.json();
+    alert(result.message);
+
+    
+    syncPriceInWishlist(productId, originalPrice);
+
+    
+    loadProducts();
+  }
+
+  loadProducts(); 
+
+  
+  function renderWishlist() {
+    const wishlist = JSON.parse(localStorage.getItem('wishlist')) || [];
+    const wishlistContainer = document.getElementById('wishlist-container');
+    wishlistContainer.innerHTML = '';
+
+    if (wishlist.length === 0) {
+      wishlistContainer.innerHTML = '<p>Your wishlist is empty.</p>';
+    }
+
+    wishlist.forEach(product => {
+      const card = document.createElement('div');
+      card.className = 'card p-3';
+      card.innerHTML = `
+        <h5>${product.name}</h5>
+        <p><strong>Price:</strong> $${product.price}</p>
+      `;
+      wishlistContainer.appendChild(card);
+    });
+  }
+
+  window.onload = function() {
+    renderWishlist();
+  };
+</script>
