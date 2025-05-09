@@ -1,0 +1,260 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+  <title>Checkout - PC Builder</title>
+  <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
+  <style>
+    body {
+      background: url("user.jpg") no-repeat center center fixed;
+      background-size: cover;
+      background-color: #f1f3f5;
+      font-family: 'Roboto', sans-serif;
+    }
+
+    .container {
+      margin-top: 60px;
+      max-width: 1200px;
+    }
+
+    h2 {
+      font-size: 3rem;
+      font-weight: 700;
+      color: #007bff;
+      text-align: center;
+      margin-bottom: 40px;
+    }
+
+    .card {
+      border-radius: 15px;
+      box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
+      margin-bottom: 30px;
+      background-color: #fff;
+      transition: transform 0.2s ease, box-shadow 0.3s ease;
+    }
+
+    .card:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 15px 30px rgba(0, 0, 0, 0.2);
+    }
+
+    .card-body {
+      padding: 20px;
+      text-align: left;
+    }
+
+    .total-price {
+      font-size: 1.8rem;
+      font-weight: 700;
+      color: #28a745;
+      margin-top: 20px;
+    }
+
+    .btn {
+      font-size: 16px;  
+      padding: 10px 30px;  
+      border-radius: 50px;
+      width: 100%;
+      transition: all 0.3s ease;
+    }
+
+    .btn-primary {
+      background-color: #007bff;
+      color: white;
+      border: none;
+    }
+
+    .btn-primary:hover {
+      background-color: #0056b3;
+    }
+
+    .btn-outline-dark {
+      background-color: #343a40;
+      color: white;
+      border: none;
+    }
+
+    .btn-outline-dark:hover {
+      background-color: #212529;
+    }
+
+    .btn-danger {
+      background-color: #dc3545;
+      color: white;
+      border: none;
+    }
+
+    .btn-danger:hover {
+      background-color: #c82333;
+    }
+
+    .back-btn {
+      background-color: #6c757d;
+      color: white;
+      border-radius: 50px;
+      font-size: 16px;
+      padding: 10px 30px;
+      transition: all 0.3s ease;
+      width: 100%;
+    }
+
+    .back-btn:hover {
+      background-color: #5a6268;
+    }
+
+    .card-title {
+      font-size: 1.25rem;
+      font-weight: 600;
+    }
+
+    .loading-spinner {
+      display: none;
+      width: 50px;
+      height: 50px;
+      border: 5px solid rgba(0, 0, 0, 0.1);
+      border-radius: 50%;
+      border-top: 5px solid #007bff;
+      animation: spin 1s linear infinite;
+      margin: 0 auto;
+    }
+
+    @keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+
+    .order-card {
+      background-color: #f1f3f5;
+      border-radius: 15px;
+      padding: 20px;
+      box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+    }
+
+    .order-card h5 {
+      font-size: 1.2rem;
+      font-weight: 600;
+      color: #007bff;
+    }
+
+    .order-card p {
+      font-size: 1rem;
+      color: #333;
+    }
+
+    .order-card ul {
+      padding-left: 20px;
+    }
+
+    .order-card ul li {
+      font-size: 0.9rem;
+      color: #6c757d;
+    }
+
+    .text-muted {
+      font-size: 1rem;
+      color: #6c757d;
+    }
+
+    @media (max-width: 768px) {
+      .btn {
+        width: 100%;
+      }
+      .back-btn {
+        width: 100%;
+      }
+    }
+
+  </style>
+</head>
+<body>
+
+  <script>
+    const user = JSON.parse(localStorage.getItem('user'));
+    if (!user) {
+      window.location.href = 'login_view.html';
+    }
+  </script>
+
+  <div class="container">
+    <h2>🧾 Checkout Summary</h2>
+
+    <div id="order-list"></div>
+
+    <h4>Total: $<span id="total-price">0.00</span></h4>
+
+    <div class="d-flex justify-content-between mt-4">
+      <button class="btn btn-danger" onclick="clearCart()">Clear Cart</button>
+      <a href="cart.html" class="btn btn-outline-dark">← Back to Cart</a>
+      <button class="btn btn-primary" onclick="placeOrder()">Place Order</button>
+    </div>
+  </div>
+
+  <script>
+    function renderCart() {
+      const cart = JSON.parse(localStorage.getItem('cart')) || [];
+      const container = document.getElementById('order-list');
+      const totalDisplay = document.getElementById('total-price');
+
+      container.innerHTML = '';
+      let total = 0;
+
+      if (cart.length === 0) {
+        container.innerHTML = '<p class="text-muted">Your cart is empty.</p>';
+        return;
+      }
+
+      cart.forEach(product => {
+        const card = document.createElement('div');
+        card.className = 'order-card p-3';
+
+        const title = document.createElement('h5');
+        title.textContent = product.name;
+
+        const price = document.createElement('p');
+        price.innerHTML = `<strong>Price:</strong> $${product.price}`;
+
+        total += parseFloat(product.price);
+        card.appendChild(title);
+        card.appendChild(price);
+        container.appendChild(card);
+      });
+
+      totalDisplay.textContent = total.toFixed(2);
+    }
+
+    
+    async function placeOrder() {
+      const cart = JSON.parse(localStorage.getItem('cart')) || [];
+
+      if (cart.length === 0) {
+        alert("Your cart is empty!");
+        return;
+      }
+
+      
+      const user = JSON.parse(localStorage.getItem('user'));
+
+      await fetch('http://127.0.0.1:5000/checkout', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ user, cart })
+      })
+      .then(response => response.json())
+      .then(data => {
+        alert(data.message);  
+        localStorage.removeItem('cart');  
+        window.location.href = 'user_view.html';  
+      })
+      .catch(error => {
+        console.error("Error placing order:", error);
+        alert("Failed to place the order. Please try again.");
+      });
+    }
+
+    
+    renderCart();
+  </script>
+
+</body>
+</html>
