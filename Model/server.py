@@ -242,5 +242,132 @@ def get_user_orders(username):
     } for order in orders])
 
 
+@app.route("/create-admin", methods=["POST"])
+def create_new_admin():
+    data = request.get_json()
+    username = data.get("username")
+    email = data.get("email")
+    password = data.get("password")
+
+    if users_collection.find_one({"username": username}):
+        return jsonify({"message": "Username already exists"}), 400
+
+    hashed_password = bcrypt.hashpw(password.encode('utf-8'), bcrypt.gensalt())
+    new_admin = {
+        "username": username,
+        "email": email,
+        "password_hash": hashed_password,
+        "role": "admin",
+        "permissions": ["manage_users", "manage_products", "manage_vendors"]
+    }
+    users_collection.insert_one(new_admin)
+    return jsonify({"message": "New admin created successfully!"}), 201
+
+
+@app.route("/api/users", methods=["GET"])
+def list_users():
+    users = users_collection.find({}, {"password_hash": 0}) 
+    return jsonify([{
+        "username": u["username"],
+        "email": u.get("email", ""),
+        "role": u.get("role", "user"),
+        "alerts": u.get("alerts", []),
+        "wishlist": u.get("wishlist", [])
+    } for u in users])
+
+
+
+@app.route("/update-user", methods=["PATCH"])
+def update_user():
+    data = request.get_json()
+    username = data.get("username")
+    updates = data.get("updates", {})
+
+    if not username:
+        return jsonify({"message": "Username is required"}), 400
+
+    if updates:
+        result = users_collection.update_one(
+            {"username": username},
+            {"$set": updates}
+        )
+        if result.modified_count > 0:
+            return jsonify({"message": "User updated successfully"}), 200
+        return jsonify({"message": "No changes made"}), 200
+
+    return jsonify({"message": "Nothing to update"}), 400
+
+
+
+@app.route("/remove-product-from-wishlist", methods=["POST"])
+def remove_product_from_wishlist():
+    data = request.get_json()
+    user = data.get("user")
+    product_name = data.get("product_name")  
+
+    if not user or not product_name:
+        return jsonify({"message": "Missing user or product data"}), 400
+
+    
+    result = users_collection.update_one(
+        {"username": user["username"]},
+        {"$pull": {"wishlist": {"name": product_name}}}  
+    )
+
+    if result.modified_count > 0:
+        return jsonify({"message": f"{product_name} removed from wishlist."}), 200
+    else:
+        return jsonify({"message": "Product not found in wishlist."}), 404
+
+
+
+@app.route("/delete-user", methods=["DELETE", "OPTIONS"])
+def delete_user():
+    if request.method == "OPTIONS":
+        return '', 200
+
+    data = request.get_json()
+    username = data.get("username")
+    if not username:
+        return jsonify({"message": "Username required"}), 400
+
+    result = users_collection.delete_one({"username": username})
+    if result.deleted_count > 0:
+        return jsonify({"message": f"{username} deleted successfully"}), 200
+    return jsonify({"message": "User not found"}), 404
+
+
+@app.route("/ordered-products", methods=["GET"])
+def show_ordered_products():
+    ordered_items = []
+    for user in users_collection.find():
+        username = user.get("username", "unknown")
+        for order in user.get("orders", []):
+            if order.get("status") == "ordered":
+                product = order.get("product", {})
+                ordered_items.append({
+                    "user": username,
+                    "name": product.get("name", "Unnamed Product"),
+                    "price": product.get("price", 0)
+                })
+    return jsonify(ordered_items)
+
+
+@app.route("/all-user-orders", methods=["GET"])
+def all_user_orders():
+    all_users = users_collection.find({"orders": {"$exists": True, "$ne": []}})
+    result = []
+    for user in all_users:
+        username = user.get("username", "Unknown")
+        product_names = [
+            order.get("product", {}).get("name", "Unnamed Product")
+            for order in user.get("orders", [])
+            if order.get("status") == "ordered"
+        ]
+        if product_names:
+            result.append({"username": username, "products": product_names})
+    return jsonify(result)
+
+
 if __name__ == "__main__":
     app.run(debug=True)
