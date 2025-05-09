@@ -92,5 +92,86 @@ def admin_view():
 def user_view():
     return "User View Page"
 
+
+
+@app.route("/cart", methods=["POST"])
+def add_to_cart():
+    data = request.get_json()
+    user = data.get("user")
+    product = data.get("product")
+
+    if not user or not product:
+        return jsonify({"message": "Missing user or product data"}), 400
+
+    users_collection.update_one(
+        {"username": user["username"]},
+        {"$push": {"orders": {"product": product, "status": "in_cart"}}}
+    )
+    return jsonify({"message": "Product added to cart"}), 200
+
+
+
+@app.route("/wishlist", methods=["POST"])
+def add_to_wishlist():
+    data = request.get_json()
+    user = data.get("user")
+    product = data.get("product")
+
+    if not user or not product:
+        return jsonify({"message": "Missing user or product data"}), 400
+
+    wishlist = user.get('wishlist', [])
+   
+    if any(item['name'] == product['name'] for item in wishlist):
+        return jsonify({"message": "This product is already in your wishlist."}), 400
+
+    users_collection.update_one(
+        {"username": user["username"]},
+        {"$push": {"wishlist": product}}  
+    )
+
+    updated_user = users_collection.find_one({"username": user["username"]})
+    return jsonify({"message": "Product added to wishlist", "wishlist": updated_user.get("wishlist", [])}), 200
+
+
+
+@app.route("/clear-wishlist", methods=["POST"])
+def clear_wishlist():
+    data = request.get_json()
+    user = data.get("user")
+
+    if not user:
+        return jsonify({"message": "Missing user data"}), 400
+
+    result = users_collection.update_one(
+        {"username": user["username"]},
+        {"$set": {"wishlist": []}}  
+    )
+
+    if result.modified_count > 0:
+        return jsonify({"message": "Wishlist cleared successfully."}), 200
+    else:
+        return jsonify({"message": "Error clearing wishlist."}), 500
+
+
+
+@app.route("/cart/clear", methods=["POST"])
+def clear_cart():
+    data = request.get_json()
+    user = data.get("user")
+
+    if not user:
+        return jsonify({"message": "Missing user data"}), 400
+
+    users_collection.update_one(
+        {"username": user["username"]},
+        {
+            "$pull": {
+                "orders": {"status": "in_cart"}
+            }
+        }
+    )
+    return jsonify({"message": "Cart cleared"}), 200
+
 if __name__ == "__main__":
     app.run(debug=True)
