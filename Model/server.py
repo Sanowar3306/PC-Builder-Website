@@ -90,7 +90,7 @@ def get_component_products(component):
 
     return jsonify(products)
 
-  app.route("/admin", methods=["GET"])
+@app.route("/admin", methods=["GET"])
 def admin_view():
     return "Admin View Page"
 
