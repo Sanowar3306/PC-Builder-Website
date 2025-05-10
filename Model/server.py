@@ -305,6 +305,26 @@ def update_user():
 
 
 
+@app.route("/remove-product-from-orders", methods=["POST"])
+def remove_product_from_orders():
+    data = request.get_json()
+    user = data.get("user")
+    product_name = data.get("product_name")
+
+    if not user or not product_name:
+        return jsonify({"message": "Missing user or product data"}), 400
+
+    result = users_collection.update_one(
+        {"username": user["username"]},
+        {"$pull": {"orders": {"product.name": product_name}}}  
+    )
+
+    if result.modified_count > 0:
+        return jsonify({"message": f"{product_name} removed from orders."}), 200
+    else:
+        return jsonify({"message": "Product not found in orders."}), 404
+
+
 @app.route("/remove-product-from-wishlist", methods=["POST"])
 def remove_product_from_wishlist():
     data = request.get_json()
@@ -314,17 +334,14 @@ def remove_product_from_wishlist():
     if not user or not product_name:
         return jsonify({"message": "Missing user or product data"}), 400
 
-    
     result = users_collection.update_one(
         {"username": user["username"]},
         {"$pull": {"wishlist": {"name": product_name}}}  
     )
-
     if result.modified_count > 0:
         return jsonify({"message": f"{product_name} removed from wishlist."}), 200
     else:
         return jsonify({"message": "Product not found in wishlist."}), 404
-
 
 
 @app.route("/delete-user", methods=["DELETE", "OPTIONS"])
