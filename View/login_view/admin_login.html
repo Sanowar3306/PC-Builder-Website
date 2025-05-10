@@ -1,42 +1,23 @@
 <!doctype html>
 <html lang="en">
-
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=yes">
   <title>Admin Login</title>
-  <!-- Bootstrap CSS -->
   <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
   <style>
     body {
       background: url("pc_profile.jpg") no-repeat center center fixed;
       background-size: cover;
     }
-    
-    .full-height {
-      height: 100vh;
-    }
-
+    .full-height { height: 100vh; }
     .form-content {
       background: white;
       border-radius: 8px;
-      box-shadow: 0px 0px 20px rgba(0, 0, 0, 0.1);
+      box-shadow: 0 0 20px rgba(0, 0, 0, 0.1);
       padding: 30px;
     }
-
-    .form-row {
-      margin-bottom: 20px;
-    }
-
-    .form-row label {
-      margin-bottom: 10px;
-      display: block;
-    }
-
-    .form-row-last {
-      text-align: center;
-    }
-
+    .form-row { margin-bottom: 20px; }
     .admin-header {
       background-color: #343a40;
       color: white;
@@ -46,32 +27,29 @@
     }
   </style>
 </head>
-
 <body>
-  <div class="content">
-    <div class="container full-height d-flex align-items-center justify-content-center">
-      <div class="col-md-6">
-        <div class="form-content">
-          <div class="admin-header text-center">
-            <h2>PC Builder Platform</h2>
-            <p>Administrator Access</p>
-          </div>
+  <div class="container full-height d-flex align-items-center justify-content-center">
+    <div class="col-md-6">
+      <div class="form-content">
+        <div class="admin-header text-center">
+          <h2>PC Builder Platform</h2>
+          <p>Administrator Access</p>
+        </div>
 
-          <div class="form-row">
-            <label for="username">Admin Username</label>
-            <input type="text" name="adminusername" class="form-control" id="username">
-          </div>
-          <div class="form-row">
-            <label for="password">Admin Password</label>
-            <input type="password" name="password" class="form-control" id="password">
-          </div>
-          <div class="form-row-last">
-            <input type="submit" value="Admin Login" class="btn btn-dark btn-block">
-          </div>
+        <div class="form-row">
+          <label for="username">Admin Username</label>
+          <input type="text" class="form-control" id="username">
+        </div>
+        <div class="form-row">
+          <label for="password">Admin Password</label>
+          <input type="password" class="form-control" id="password">
+        </div>
+        <div class="form-row-last">
+          <input type="submit" value="Admin Login" class="btn btn-dark btn-block">
+        </div>
 
-          <div class="text-center mt-4">
-            <span class="text-muted">Are you a regular user? <a href="login_view.html">Go to user login</a></span>
-          </div>
+        <div class="text-center mt-4">
+          <span class="text-muted">Are you a regular user? <a href="login_view.html">Go to user login</a></span>
         </div>
       </div>
     </div>
@@ -79,7 +57,7 @@
 
   <script>
     document.querySelector('.btn.btn-dark').addEventListener('click', async function (event) {
-      event.preventDefault(); // Prevent form reload
+      event.preventDefault();
 
       const username = document.getElementById('username').value;
       const password = document.getElementById('password').value;
@@ -91,22 +69,15 @@
       });
 
       const result = await response.json();
-      console.log(result);
 
-      if (response.ok) {
-        // Check if user has admin role
-        if (result.user.role === 'admin') {
-          alert('Admin login successful!');
-          // Redirect to admin view
-          window.location.href = '../admin_view/admin_view.html'; // Redirects to admin_view.html
-        } else {
-          alert('You do not have administrator privileges');
-        }
+      if (response.ok && result.user.role === 'admin') {
+        alert('Admin login successful!');
+        localStorage.setItem('admin', JSON.stringify(result.user));
+        window.location.href = '../admin_view/admin_view.html';
       } else {
         alert(result.message || 'Invalid admin credentials');
       }
     });
   </script>
 </body>
-
 </html>
