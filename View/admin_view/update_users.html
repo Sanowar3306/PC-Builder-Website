@@ -201,7 +201,7 @@ function renderData(users, ordersMap) {
           <input class="form-control" data-key="email" value="${user.email}">
           <label>Role</label>
           <input class="form-control" data-key="role" value="${user.role}">
-          ${!isAdmin ? `
+          ${!isAdmin ? ` 
           <label>Orders</label><div>${orderBadges || '<i>No orders</i>'}</div>
           <label>Wishlist</label><div>${wishlistBadges || '<i>No wishlist</i>'}</div>
           ` : ''}
@@ -235,13 +235,46 @@ async function saveUser(oldUsername, btn) {
 }
 
 async function removeProduct(username, name, target) {
-  await fetch("http://127.0.0.1:5000/remove-product", {
-    method: "PATCH",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ username, product_name: name, target })
+  let url = '';
+  if (target === 'wishlist') {
+    url = "http://127.0.0.1:5000/remove-product-from-wishlist";  
+  } else if (target === 'orders') {
+    url = "http://127.0.0.1:5000/remove-product-from-orders"; 
+  }
+
+
+  console.log("Sending data:", {
+    username: username,
+    product_name: name,
+    target: target
   });
-  loadData();
+
+
+  const requestBody = {
+    user: { username: username },
+    product_name: name
+  };
+
+  await fetch(url, {
+    method: "POST",
+    headers: { 
+      "Content-Type": "application/json"  
+    },
+    body: JSON.stringify(requestBody)
+  })
+  .then(response => response.json())
+  .then(data => {
+    if (data.message) {
+      console.log(data.message);  
+    }
+    loadData(); 
+  })
+  .catch(error => {
+    console.error("Error removing product:", error);
+    alert("Failed to remove product.");
+  });
 }
+
 
 async function deleteUser(username) {
   if (!confirm(`Are you sure you want to delete "${username}"?`)) return;
@@ -268,5 +301,7 @@ loadData();
 
 <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.5.2/dist/js/bootstrap.bundle.min.js"></script>
+
 </body>
 </html>
+
