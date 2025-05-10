@@ -4,8 +4,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=yes">
-  <title>Register User</title>
-  <!-- Bootstrap CSS -->
+  <title>Login User</title>
   <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
   <style>
     body {
@@ -43,28 +42,33 @@
       height: 20px;
       margin-right: 10px;
     }
+
     .full-height {
       height: 100vh;
     }
+
     .form-content {
       background: white;
       border-radius: 8px;
       box-shadow: 0px 0px 20px rgba(0, 0, 0, 0.1);
       padding: 30px;
     }
+
     .form-row {
       margin-bottom: 20px;
     }
+
     .form-row label {
       margin-bottom: 10px;
       display: block;
     }
+
     .form-row-last {
       text-align: center;
-    
     }
   </style>
 </head>
+
 <body>
   <div class="content">
     <div class="container full-height d-flex align-items-center justify-content-center">
@@ -72,87 +76,62 @@
           <div class="form-content">
             <div class="text-center">
               <h2>PC Builder Platform</h2>
-              <p class="text-muted">Create New Account</p>
+              <p class="text-muted">User Login</p>
             </div>
 
-              <div class="form-row">
-                <label for="username">Username</label>
-                <input type="text" name="username" class="form-control" id="username">
-              </div>
-              <div class="form-row">
-                <label for="email">Email</label>
-                <input type="email" name="email" class="form-control" id="email">
-              </div>
-              <div class="form-row">
-                <label for="password">Password</label>
-                <input type="password" name="password" class="form-control" id="password">
-              </div>
-              <div class="form-row">
-                <label for="confirm-password">Confirm Password</label>
-                <input type="password" name="confirm-password" class="form-control" id="confirm-password">
-              </div>
-              <div class="form-row-last">
-                <input type="submit" value="Register" class="btn btn-primary btn-block">
-              </div>
-              <div class="google-signin-container text-center my-4">
-                <a href="" class="btn btn-google">
-                    <img src="https://developers.google.com/identity/images/g-logo.png" alt="Google logo" class="google-logo">
-                    Sign up with Google
-                </a>
+            <div class="form-row">
+              <label for="username">Username</label>
+              <input type="text" name="username" class="form-control" id="username">
             </div>
-            <div class="google-signin-container text-center my-4">
-              <a href="" class="btn btn-google">
-                  <img src="https://github.githubassets.com/images/modules/logos_page/GitHub-Mark.png" alt="GitHub logo" class="google-logo">
-                  Sign up with GitHub
-              </a>
-          </div>
-            
-            </form>
+            <div class="form-row">
+              <label for="password">Password</label>
+              <input type="password" name="password" class="form-control" id="password">
+            </div>
+            <div class="form-row-last">
+              <input type="submit" value="Log In" class="btn btn-primary btn-block">
+            </div>
+
             <div class="text-center mt-4">
-              <span class="text-muted">Already have an account? <a href="login_view.html">Login here</a></span>
+              <span class="text-muted">Do not have an account? <a href="register.html">Create an account!</a></span>
+            </div>
+            <div class="text-center mt-4">
+              <span class="text-muted">Log in into other accounts:</span>
+              <br>
+              <a href="admin_login.html">Admin</a> <!-- Now redirects to admin_login.html -->
             </div>
           </div>
         </div>
       </div>
     </div>
   </div>
+
   <script>
     document.querySelector('.btn.btn-primary').addEventListener('click', async function(event) {
       event.preventDefault();  // prevent form reload
     
       const username = document.getElementById('username').value;
-      const email = document.getElementById('email').value;
       const password = document.getElementById('password').value;
-      const confirmPassword = document.getElementById('confirm-password').value;
-      
-      // Simple validation
-      if (!username || !email || !password) {
-        alert('Please fill all required fields');
-        return;
-      }
-      
-      if (password !== confirmPassword) {
-        alert('Passwords do not match');
-        return;
-      }
     
-      const response = await fetch('http://127.0.0.1:5000/register', {   
+      const response = await fetch('http://127.0.0.1:5000/login', {   
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ username, email, password })
+        body: JSON.stringify({ username, password })
       });
     
       const result = await response.json();
     
       if (response.ok) {
-        alert('Registration successful! Please log in.');
-        window.location.href = 'login_view.html';
+        if (result.user.role === 'user')
+        alert('Login successful!');
+        localStorage.setItem('user', JSON.stringify(result.user));
+        // Redirect: go up one folder and into user_view/
+        window.location.href = '../user_view/user_view.html';
       } else {
         alert(result.message);
       }
     });
-    </script>
-    
+  </script>
+  
 </body>
 
 </html>
