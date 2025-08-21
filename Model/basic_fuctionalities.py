@@ -29,3 +29,5 @@ class BasicFunctionalities:
         return self.db.compatibility_rules.insert_one(rule_data)
 
 print("OK")
+print("OK")
+
