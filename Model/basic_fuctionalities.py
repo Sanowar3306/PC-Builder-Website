@@ -27,3 +27,5 @@ class BasicFunctionalities:
 
     def insert_compatibility_rule(self, rule_data):
         return self.db.compatibility_rules.insert_one(rule_data)
+
+print("OK")
